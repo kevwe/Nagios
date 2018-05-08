@@ -1,0 +1,53 @@
+First install all pre=requisites using the cmd below
+
+		yum install httpd php gcc glibc* gd gd-devel -y
+
+***Below is a much better installation so as not to come across issues like unzip or wget later on while compiling
+		yum install -y gcc glibc glibc-common wget unzip httpd php gd gd-devel perl
+
+Add user just for nagios alone
+		/usr/sbin/useradd -m nagios
+		passwd nagios
+Create a group for Nagios
+		/usr/sbin/groupadd nagcmd
+		*** id nagios***
+		*** grep nagios /etc/passwd***
+Add nagios & apache user to the new group
+		/usr/sbin/usermod -a -G nagcmd nagios
+		/usr/sbin/usermod -a -G nagcmd apache
+download nagios and nagios plugin 
+      wget https://sourceforge.net/projects/nagios/files/nagios-4.x/nagios-4.3.4/nagios-4.3.4.tar.gz
+			wget https://nagios-plugins.org/download/nagios-plugins-2.2.1.tar.gz
+create a directory and move the downloaded files to the new folder
+			mkdir Nagios
+			mv nagios-* Nagios/
+			cd Nagios/
+Extract the file
+			tar -xvf nagios-4.3.4.tar.gz
+			cd nagios-4.3.4
+Configure the system 
+			./configure --with-command-group=nagcmd
+Compile all the source code
+			make all
+Prepare nagios init and config and webconfig
+			make install
+			make install-init
+			make install-config
+			make install-commandmode
+			make install-webconf
+Create an account called nagiosadmin that would be used to login to the dashboard from the web
+			htpasswd -b -c /usr/local/nagios/etc/htpasswd.users nagiosadmin nagiosadmin
+Restart Apache
+			systemctl restart httpd
+Compile and install nagios plugin
+Extract nagios plugin
+			tar -xvf nagios-plugins-2.2.1.tar.gz
+Compile and install
+			./configure --with-nagios-user=nagios --with-nagios-group=nagios
+			make
+			make install
+Verify the sample Nagios configuration files
+			/usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+If there are no errors, start Nagios
+			service nagios start
+			
